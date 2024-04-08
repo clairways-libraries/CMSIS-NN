@@ -20,10 +20,20 @@ cmake_minimum_required(VERSION 3.15.6)
 
 project(CMSISNN)
 
-add_library(cmsis-nn STATIC)
+# Add an option for choosing between building from source or using a precompiled library
+# option(ENABLE_CMSIS_NN_BUILD "Build cmsis-nn from source" ON)
 
-target_compile_options(cmsis-nn PRIVATE -Ofast)
-
-target_include_directories(cmsis-nn PUBLIC "Include")
-
-add_subdirectory(Source)
+if(ENABLE_CMSIS_NN_BUILD)
+    # Build from source
+    add_library(cmsis-nn STATIC)
+    target_compile_options(cmsis-nn PRIVATE -Ofast)
+    target_include_directories(cmsis-nn PUBLIC "Include")
+    add_subdirectory(Source)
+else()
+    # Use precompiled library
+    add_library(cmsis-nn STATIC IMPORTED)
+    set_target_properties(cmsis-nn PROPERTIES
+        IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/libcmsis-nn.a)
+    target_compile_options(cmsis-nn INTERFACE -Ofast)
+    target_include_directories(cmsis-nn INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
+endif()
