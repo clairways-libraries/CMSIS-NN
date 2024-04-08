@@ -21,7 +21,7 @@ cmake_minimum_required(VERSION 3.15.6)
 project(CMSISNN)
 
 # Add an option for choosing between building from source or using a precompiled library
-# option(ENABLE_CMSIS_NN_BUILD "Build cmsis-nn from source" ON)
+# option(ENABLE_CMSIS_NN_BUILD "Build cmsis-nn from source" ON) # OR cmake -B build -DENABLE_CMSIS_NN_BUILD=1
 
 if(ENABLE_CMSIS_NN_BUILD)
     # Build from source
