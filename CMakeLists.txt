@@ -31,9 +31,12 @@ if(ENABLE_CMSIS_NN_BUILD)
     add_subdirectory(Source)
 else()
     # Use precompiled library
-    add_library(cmsis-nn STATIC IMPORTED)
+    add_library(cmsis-nn STATIC IMPORTED GLOBAL)
     set_target_properties(cmsis-nn PROPERTIES
         IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/libcmsis-nn.a)
-    target_compile_options(cmsis-nn INTERFACE -Ofast)
-    target_include_directories(cmsis-nn INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
+    # target_compile_options(cmsis-nn INTERFACE -Ofast)
+    target_include_directories(cmsis-nn INTERFACE 
+        ${CMAKE_CURRENT_SOURCE_DIR}/Include
+    )
+    
 endif()
