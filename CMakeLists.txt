@@ -26,7 +26,11 @@ option(ENABLE_CMSIS_NN_BUILD "Build cmsis-nn from source" ON) # OR cmake -B buil
 if(ENABLE_CMSIS_NN_BUILD)
     # Build from source
     add_library(cmsis-nn STATIC)
-    target_compile_options(cmsis-nn PRIVATE -Ofast)
+    target_compile_options(cmsis-nn PRIVATE 
+    -Ofast
+    -mfloat-abi=hard
+    -mfpu=fpv4-sp-d16
+    )
     target_include_directories(cmsis-nn PUBLIC "Include")
     add_subdirectory(Source)
 else()
