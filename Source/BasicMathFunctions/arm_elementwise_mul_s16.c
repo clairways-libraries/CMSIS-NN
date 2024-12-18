@@ -58,9 +58,6 @@ arm_cmsis_nn_status arm_elementwise_mul_s16(const int16_t *input_1_vect,
                                             const int32_t out_activation_max,
                                             const int32_t block_size)
 {
-    (void)input_1_offset;
-    (void)input_2_offset;
-    (void)out_offset;
     int32_t loop_count;
 
 #if defined(ARM_MATH_MVEI)
@@ -94,13 +91,21 @@ arm_cmsis_nn_status arm_elementwise_mul_s16(const int16_t *input_1_vect,
     int32_t input_2;
     int32_t mul_res;
     int32_t two_halfword_1, two_halfword_2;
+    int32_t offset_1_packed, offset_2_packed;
     int16_t mul_1, mul_2;
+
+    offset_1_packed = (input_1_offset << 16U) | (input_1_offset & 0x0FFFFL);
+    offset_2_packed = (input_2_offset << 16U) | (input_2_offset & 0x0FFFFL);
+
     loop_count = block_size / 2;
 
     while (loop_count > 0)
     {
         two_halfword_1 = arm_nn_read_q15x2_ia(&input_1_vect);
         two_halfword_2 = arm_nn_read_q15x2_ia(&input_2_vect);
+
+        two_halfword_1 += offset_1_packed; // NOTE: Ensure that overflow doesn't occur
+        two_halfword_2 += offset_2_packed;
 
     #if defined(ARM_MATH_DSP)
         mul_res = SMULBB(two_halfword_1, two_halfword_2);
@@ -109,7 +114,7 @@ arm_cmsis_nn_status arm_elementwise_mul_s16(const int16_t *input_1_vect,
         input_2 = (int16_t)(two_halfword_2 & 0xFFFF);
         mul_res = input_1 * input_2;
     #endif
-        mul_res = arm_nn_requantize(mul_res, out_mult, out_shift);
+        mul_res = arm_nn_requantize(mul_res, out_mult, out_shift) + out_offset;
         mul_res = MAX(mul_res, out_activation_min);
         mul_res = MIN(mul_res, out_activation_max);
         mul_1 = (int16_t)mul_res;
@@ -121,7 +126,7 @@ arm_cmsis_nn_status arm_elementwise_mul_s16(const int16_t *input_1_vect,
         input_2 = (int16_t)(two_halfword_2 >> 16);
         mul_res = input_1 * input_2;
     #endif
-        mul_res = arm_nn_requantize(mul_res, out_mult, out_shift);
+        mul_res = arm_nn_requantize(mul_res, out_mult, out_shift) + out_offset;
         mul_res = MAX(mul_res, out_activation_min);
         mul_res = MIN(mul_res, out_activation_max);
         mul_2 = (int16_t)mul_res;
@@ -136,11 +141,11 @@ arm_cmsis_nn_status arm_elementwise_mul_s16(const int16_t *input_1_vect,
     {
         /* C = A * B */
 
-        input_1 = *input_1_vect++;
-        input_2 = *input_2_vect++;
+        input_1 = *input_1_vect++ + input_1_offset;
+        input_2 = *input_2_vect++ + input_2_offset;
 
         mul_res = input_1 * input_2;
-        mul_res = arm_nn_requantize(mul_res, out_mult, out_shift);
+        mul_res = arm_nn_requantize(mul_res, out_mult, out_shift) + out_offset;
 
         mul_res = MAX(mul_res, out_activation_min);
         mul_res = MIN(mul_res, out_activation_max);
