@@ -44,7 +44,13 @@ static void scale_q31_to_q7_and_clamp(const int32_t *buffer,
     for (int i = 0; i < length; i++)
     {
         int32_t sum = buffer[i] > 0 ? (buffer[i] + half_count) : (buffer[i] - half_count);
+        int32_t remainder = sum % count;
         sum = sum / count;
+        // Bankers' rounding: If equidistant, round to nearest even
+        if (remainder == 0 && (sum % 2 != 0))
+        {
+            sum += (buffer[i] < 0) ? 1 : -1;
+        }
         sum = MAX(sum, act_min);
         sum = MIN(sum, act_max);
 
