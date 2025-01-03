@@ -21,17 +21,17 @@ cmake_minimum_required(VERSION 3.15.6)
 project(CMSISNN)
 
 # Add an option for choosing between building from source or using a precompiled library
-option(ENABLE_CMSIS_NN_BUILD "Build cmsis-nn from source" OFF) # OR cmake -B build -DENABLE_CMSIS_NN_BUILD=1
+option(ENABLE_CMSIS_NN_BUILD "Build cmsis-nn from source" ON) # OR cmake -B build -DENABLE_CMSIS_NN_BUILD=1
 
 if(ENABLE_CMSIS_NN_BUILD)
     # Build from source
     add_library(cmsis-nn STATIC)
     target_compile_options(cmsis-nn PRIVATE
-    -Ofast
-    -mfloat-abi=hard
-    -mfpu=fpv4-sp-d16
-    -mcpu=cortex-m4
-    -mthumb
+        -Ofast
+        -mfloat-abi=hard
+        -mfpu=fpv4-sp-d16
+        -mcpu=cortex-m4
+        -mthumb
     )
     target_include_directories(cmsis-nn PUBLIC "Include")
     add_subdirectory(Source)
